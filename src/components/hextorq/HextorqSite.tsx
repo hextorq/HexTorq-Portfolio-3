@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { ParticleField } from "./ParticleField";
 import { SmoothScroll } from "./SmoothScroll";
+import { TemplateSwitcher } from "./TemplateSwitcher";
+import { currentSectionFromPath, pushRouteForSection, routeForSection, scrollToSection } from "../../routeUtils";
 
 /* -------------------------------------------------------------------------- */
 /* Nav                                                                        */
@@ -49,7 +51,15 @@ function Nav() {
           scrolled ? "glass rounded-full px-4" : ""
         }`}
       >
-        <a href="#top" className="flex items-center gap-2 group">
+        <a
+          href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            pushRouteForSection("top");
+            scrollToSection("top");
+          }}
+          className="flex items-center gap-2 group"
+        >
           <div className="relative w-8 h-8">
             <div className="absolute inset-0 rounded-md bg-gradient-to-br from-neon to-neon-2 opacity-90 group-hover:opacity-100 rotate-45 transition" />
             <div className="absolute inset-1 rounded bg-background rotate-45" />
@@ -60,14 +70,34 @@ function Nav() {
           </span>
         </a>
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#pillars" className="hover:text-foreground transition">Pillars</a>
-          <a href="#digital" className="hover:text-foreground transition">Digital</a>
-          <a href="#innovation" className="hover:text-foreground transition">Innovation</a>
-          <a href="#education" className="hover:text-foreground transition">Education</a>
-          <a href="#portfolio" className="hover:text-foreground transition">Work</a>
+          {[
+            ["pillars", "About"],
+            ["digital", "Services"],
+            ["portfolio", "Products"],
+            ["education", "Projects"],
+            ["process", "Process"],
+          ].map(([section, label]) => (
+            <a
+              key={section}
+              href={routeForSection(section)}
+              onClick={(e) => {
+                e.preventDefault();
+                pushRouteForSection(section);
+                scrollToSection(section);
+              }}
+              className="hover:text-foreground transition"
+            >
+              {label}
+            </a>
+          ))}
         </nav>
         <a
-          href="#cta"
+          href="/contact/"
+          onClick={(e) => {
+            e.preventDefault();
+            pushRouteForSection("cta");
+            scrollToSection("cta");
+          }}
           className="glass rounded-full px-4 py-2 text-sm font-medium hover:bg-white/10 transition flex items-center gap-1.5"
         >
           Start a project <ArrowRight className="w-3.5 h-3.5" />
@@ -865,7 +895,7 @@ function ProcessSection() {
   const pathProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
   const dashOffset = useTransform(pathProgress, [0, 1], [1200, 0]);
   return (
-    <section ref={ref} className="relative py-32 px-6">
+    <section ref={ref} id="process" className="relative py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="max-w-2xl">
           <span className="text-xs uppercase tracking-[0.3em] text-neon">— How we build</span>
@@ -1070,10 +1100,21 @@ function PillarHeader({
 /* -------------------------------------------------------------------------- */
 
 export function HextorqSite() {
+  useEffect(() => {
+    const scrollToCurrentRoute = () => {
+      const section = currentSectionFromPath();
+      if (section) window.setTimeout(() => scrollToSection(section), 80);
+    };
+    scrollToCurrentRoute();
+    window.addEventListener("popstate", scrollToCurrentRoute);
+    return () => window.removeEventListener("popstate", scrollToCurrentRoute);
+  }, []);
+
   return (
     <div className="relative bg-background text-foreground selection:bg-neon/30 selection:text-white">
       <SmoothScroll />
       <Nav />
+      <TemplateSwitcher />
       <main>
         <HeroSection />
         <SectionTransition><ManifestoSection /></SectionTransition>

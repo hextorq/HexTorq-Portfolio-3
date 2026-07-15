@@ -8,11 +8,10 @@ const templatePath = resolve(dist, "index.html");
 const serverEntry = resolve(dist, "server/entry-server.js");
 const routes = [
   "/",
-  "/pillars/",
-  "/digital/",
-  "/innovation/",
-  "/education/",
-  "/portfolio/",
+  "/about/",
+  "/services/",
+  "/products/",
+  "/projects/",
   "/process/",
   "/contact/",
 ];
